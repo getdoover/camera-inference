@@ -5,19 +5,19 @@ This ensures all modules are importable and that the config is valid.
 """
 
 def test_import_app():
-    from app_template.application import SampleApplication
-    assert SampleApplication
+    from cattle_cam.application import CattleCamApplication
+    assert CattleCamApplication
 
 def test_config():
-    from app_template.app_config import SampleConfig
+    from cattle_cam.app_config import CattleCamConfig
 
-    config = SampleConfig()
+    config = CattleCamConfig()
     assert isinstance(config.to_dict(), dict)
 
 def test_ui():
-    from app_template.app_ui import SampleUI
-    assert SampleUI
+    from cattle_cam.app_ui import CattleCamUI
+    assert CattleCamUI
 
 def test_state():
-    from app_template.app_state import SampleState
-    assert SampleState
+    from cattle_cam.app_state import CattleCamState
+    assert CattleCamState
