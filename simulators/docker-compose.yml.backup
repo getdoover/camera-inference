@@ -21,10 +21,10 @@ services:
     #   - sample_simulator
     environment:
       - APP_KEY=test_app_key
-      # - CONFIG_FP=/app_config.json
+      - CONFIG_FP=/app_config.json
     # volumes:
     #   - ./app_config.json:/app_config.json
-    entrypoint: python -m cattle_cam.cattle_cam
+    # entrypoint: python -m cattle_cam.cattle_cam
+    entrypoint: python -m cattle_cam.cattle_cam_stream
     ports:
-      - "8080:8080"  # HLS web viewer port
-      - "8765:8765"  # Original port
+      - "8765:8765"
