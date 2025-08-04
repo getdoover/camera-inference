@@ -2,14 +2,9 @@ import logging
 import time
 
 from pydoover.docker import Application
-from pydoover import ui
 
-import cv2
-from ultralytics import YOLO
 
 from .app_config import CattleCamConfig
-from .app_ui import CattleCamUI
-from .app_state import CattleCamState
 
 log = logging.getLogger()
 

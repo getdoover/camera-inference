@@ -4,8 +4,6 @@ import http.server
 import socketserver
 import threading
 import os
-from pathlib import Path
-import cv2
 import logging
 import uuid
 
@@ -67,11 +65,15 @@ class SimpleHlsWebViewer:
                 if self.path == '/':
                     self.send_response(200)
                     self.send_header('Content-type', 'text/html')
+                    self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+                    self.send_header('Pragma', 'no-cache')
+                    self.send_header('Expires', '0')
                     self.end_headers()
                     self.wfile.write(html_content.encode())
                 else:
                     # Fall back to configured directory
                     super().do_GET()
+
         
         # Start server in a separate thread
         self.server = socketserver.TCPServer(
@@ -85,7 +87,7 @@ class SimpleHlsWebViewer:
         import socket
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
-        print(f"Web viewer started at:")
+        print("Web viewer started at:")
         print(f"  Local: http://localhost:{self.port}")
         print(f"  Network: http://{local_ip}:{self.port}")
 
@@ -122,12 +124,12 @@ class HlsStreamer:
         self.setup_output_file()
 
         if self.viewer_port is not None:
-            self.viewer = SimpleHlsWebViewer(
+            self._viewer = SimpleHlsWebViewer(
                 port=self.viewer_port,
                 static_dir=self.output_dir,
                 stream_file=self.output_file
             )
-            self.viewer.start()
+            self._viewer.start()
 
         print(f"Output file: {self.output_file}")
         print(f"Output directory: {self.output_dir}")
@@ -147,18 +149,25 @@ class HlsStreamer:
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
             '-tune', 'zerolatency',
+            # GOP settings for low latency
+            '-g', str(self.fps),  # GOP size = framerate (1 second)
+            '-keyint_min', str(self.fps),  # Minimum keyframe interval
+            '-sc_threshold', '0',  # Disable scene change detection
+            # Low latency HLS settings
             '-f', 'hls',
-            '-hls_time', '5',              # Segment length (seconds)
-            '-force_key_frames', 'expr:gte(t,n_forced*5)', # For 5 second segments
-            # '-hls_wrap', '40',
-            '-hls_start_number_source', 'datetime',
+            '-hls_time', '1',
+            # '-hls_part_time', '0.125', 
+            # '-hls_segment_options', 'mpegts_flags=+initial_discontinuity'             # Reduced to 1 second segments
+            '-hls_list_size', '3',         # Keep 3 segments (3 second buffer)
+            # '-hls_flags', 'delete_segments+independent_segments+split_by_time',
+            '-hls_segment_type', 'mpegts',  # Use MPEG-TS for better compatibility
             '-hls_delete_threshold', '1',
-            '-hls_flags', 'delete_segments+split_by_time',
+            '-force_key_frames', 'expr:gte(t,n_forced*1)',  # Keyframe every 1 second
+            # Low latency streaming optimizations
             '-flush_packets', '1',
             '-fflags', '+genpts+flush_packets',
-            # '-start_number', '10',
-            '-hls_list_size', '5',         # Number of segments to keep in playlist
-            # '-hls_flags', 'delete_segments',
+            '-max_delay', '0',
+            '-avioflags', 'direct',
             self.output_file
         ]
 
@@ -174,7 +183,7 @@ class HlsStreamer:
         # Check if process started successfully
         if self._process.poll() is not None:
             stdout, stderr = self._process.communicate()
-            print(f"FFmpeg failed to start:")
+            print("FFmpeg failed to start:")
             print(f"stdout: {stdout.decode()}")
             print(f"stderr: {stderr.decode()}")
             raise RuntimeError("FFmpeg failed to start")

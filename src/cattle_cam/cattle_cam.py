@@ -1,6 +1,6 @@
 import cv2
 from ultralytics import YOLO
-from hls_streamer import HlsStreamer
+from .hls_streamer import HlsStreamer
 import logging
 import time
 
@@ -13,7 +13,7 @@ model = YOLO("yolov8n.pt")
 # model = YOLO("yolov8n-pose.pt")  # or yolov8m/l/x-pose.pt
 
 
-def stream(rtsp_url: str, process_rate_hz: float = 2):
+def stream(rtsp_url: str, process_rate_hz: float = 1):
     cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
     # Print details of the video
     frame_count = 0
@@ -31,6 +31,17 @@ def stream(rtsp_url: str, process_rate_hz: float = 2):
         fps=process_rate_hz
     )
     hls_streamer.start()
+
+    def cleanup_and_exit(sig, frame):
+        print(f"\n=== Received signal {sig}, shutting down gracefully ===")
+        hls_streamer.stop()
+        cap.release()
+        print("=== Cleanup complete, exiting ===")
+        sys.exit(0)
+    
+    # Register handlers for both Ctrl+C and Docker stop
+    signal.signal(signal.SIGINT, cleanup_and_exit)   # Ctrl+C
+    signal.signal(signal.SIGTERM, cleanup_and_exit)  # Docker stop
 
 
     while True:
@@ -68,5 +79,5 @@ def stream(rtsp_url: str, process_rate_hz: float = 2):
 
 if __name__ == "__main__":
     # RTSP stream URL
-    RTSP_URL = "rtsp://admin:admin@192.168.50.195:8554/live"
+    RTSP_URL = "rtsp://admin:admin@192.168.50.129:8554/live"
     stream(RTSP_URL)
