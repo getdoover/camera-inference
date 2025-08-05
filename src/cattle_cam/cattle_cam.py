@@ -15,18 +15,22 @@ log.setLevel(logging.INFO)
 
 # Load model (detects 'cow' class by default if COCO)
 # model = YOLO("yolov8n.pt")
-model = YOLO("/app/src/cattle_cam/yolov8n.pt")
+model = YOLO("/app/models/yolo11n.pt")
 # model = YOLO("/app/src/cattle_cam/yolov8n-pose.pt")
 # model = YOLO("yolov8n-pose.pt")  # or yolov8m/l/x-pose.pt
+model.export(format="ncnn")
+ncnn_model = YOLO("yolo11n_ncnn_model")
+# ncnn_model.classes = [0]
+# ncnn_model.conf = 0.7
 
-global_queue = queue.Queue()
+global_queue = queue.Queue(maxsize=100)
 
 
 class VideoCapture:
     def __init__(self, name):
         self.cap = cv2.VideoCapture(name, cv2.CAP_FFMPEG)
-        self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        # self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        # self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
         # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         self.q = queue.Queue()
         t = threading.Thread(target=self._reader)
@@ -48,9 +52,9 @@ class VideoCapture:
 
     def read(self):
         frame = self.q.get()
-        new_height = int(frame.shape[0] * (640 / frame.shape[1]))
-        resized_frame = cv2.resize(frame, (640, new_height))
-        return resized_frame
+        # new_height = int(frame.shape[0] * (640 / frame.shape[1]))
+        # resized_frame = cv2.resize(frame, (640, new_height))
+        return frame
 
 
 def stream(rtsp_url: str, process_rate_hz: float = 1):
@@ -125,7 +129,7 @@ def stream(rtsp_url: str, process_rate_hz: float = 1):
 
         print("Processing frame")
         s = time.perf_counter()
-        results = model(frame)
+        results = ncnn_model(frame)
         f = time.perf_counter()
         log.info(f"Processed frame in {(f - s) * 1000}ms")
         # for r in results:
@@ -142,13 +146,15 @@ def stream(rtsp_url: str, process_rate_hz: float = 1):
         res = results[0].plot()
         out = cv2.imencode(".jpg", res)[1].tobytes()
         global_queue.put(out)
+        if global_queue.full():
+            global_queue.get_nowait()
         log.info(f"queue size: {global_queue.qsize()}")
 
         # hls_streamer.write(results[0].plot())
         f = time.perf_counter()
         log.info(f"Wrote frame in {(f - s) * 1000}ms")
 
-        # time.sleep(0)
+        time.sleep(0.2)
 
     # hls_streamer.stop()
 

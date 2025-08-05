@@ -11,6 +11,7 @@ dependencies = [
     "opencv-python-headless",
     "pillow>=11.3.0",
     "flask>=3.1.1",
+    "ncnn>=1.0.20250503",
 ]
 
 [project.scripts]
