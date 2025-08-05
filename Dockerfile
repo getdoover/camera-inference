@@ -4,13 +4,18 @@ LABEL com.doover.managed="true"
 HEALTHCHECK --interval=30s --timeout=2s --start-period=5s CMD curl -f "127.0.0.1:$HEALTHCHECK_PORT" || exit 1
 
 ## FIRST STAGE ##
-FROM base_image AS builder
+#FROM base_image AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.7.3 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    libglib2.0-0 \
+    libgl1 \
+    ffmpeg
 
 # give the app access to our pipenv installed packages
 RUN uv venv --system-site-packages
@@ -25,17 +30,13 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 
 ## SECOND STAGE ##
-FROM base_image AS final_image
+#FROM base_image AS final_image
 
 # Install YOLO, OpenCV, and WebRTC dependencies
-RUN apt-get update && apt-get install -y \
-    libglib2.0-0 \
-    libgl1 \
 
 #     libsm6 \
 #     libxext6 \
 #     libxrender-dev \
-    ffmpeg 
 #     libavcodec-dev \
 #     libavformat-dev \
 #     libavutil-dev \
@@ -59,6 +60,6 @@ RUN apt-get update && apt-get install -y \
 #     gstreamer1.0-pulseaudio \
 #     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder --chown=app:app /app /app
+#COPY --from=builder --chown=app:app /app /app
 ENV PATH="/app/.venv/bin:$PATH"
 CMD ["doover-app-run"]

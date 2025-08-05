@@ -24,7 +24,7 @@ services:
       # - CONFIG_FP=/app_config.json
     # volumes:
     #   - ./app_config.json:/app_config.json
-    entrypoint: python -m cattle_cam.cattle_cam
-    ports:
-      - "8080:8080"  # HLS web viewer port
-      - "8765:8765"  # Original port
+    entrypoint: cattle-cam-stream
+#    ports:
+#      - "8080:8080"  # HLS web viewer port
+#      - "8765:8765"  # Original port
