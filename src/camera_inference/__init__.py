@@ -7,4 +7,4 @@ def main():
     """
     Run the application.
     """
-    run_app(CameraInference(config=CameraInferenceConfig()))
+    run_app(CameraInferenceApplication(config=CameraInferenceConfig()))
