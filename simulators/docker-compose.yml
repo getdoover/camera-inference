@@ -12,7 +12,7 @@ services:
   #   environment:
   #     - APP_KEY=sim_app_key
 
-  sample_application:
+  camera_inference_app:
     build: ../
     network_mode: host
     restart: unless-stopped
@@ -21,10 +21,4 @@ services:
     #   - sample_simulator
     environment:
       - APP_KEY=test_app_key
-      # - CONFIG_FP=/app_config.json
-    # volumes:
-    #   - ./app_config.json:/app_config.json
-    entrypoint: cattle-cam-stream
-#    ports:
-#      - "8080:8080"  # HLS web viewer port
-#      - "8765:8765"  # Original port
+      - CONFIG_FP=/app/simulators/app_config.json

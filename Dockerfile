@@ -32,33 +32,6 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ## SECOND STAGE ##
 #FROM base_image AS final_image
 
-# Install YOLO, OpenCV, and WebRTC dependencies
-
-#     libsm6 \
-#     libxext6 \
-#     libxrender-dev \
-#     libavcodec-dev \
-#     libavformat-dev \
-#     libavutil-dev \
-#     libswscale-dev \
-#     libavresample-dev \
-#     libavfilter-dev \
-#     libgstreamer1.0-dev \
-#     libgstreamer-plugins-base1.0-dev \
-#     libgstreamer-plugins-bad1.0-dev \
-#     gstreamer1.0-plugins-base \
-#     gstreamer1.0-plugins-good \
-#     gstreamer1.0-plugins-bad \
-#     gstreamer1.0-plugins-ugly \
-#     gstreamer1.0-libav \
-#     gstreamer1.0-tools \
-#     gstreamer1.0-x \
-#     gstreamer1.0-alsa \
-#     gstreamer1.0-gl \
-#     gstreamer1.0-gtk3 \
-#     gstreamer1.0-qt5 \
-#     gstreamer1.0-pulseaudio \
-#     && rm -rf /var/lib/apt/lists/*
 
 #COPY --from=builder --chown=app:app /app /app
 ENV PATH="/app/.venv/bin:$PATH"

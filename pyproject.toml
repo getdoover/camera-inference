@@ -1,5 +1,5 @@
 [project]
-name = "cattle-cam"
+name = "camera-inference"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -10,14 +10,13 @@ dependencies = [
     "ultralytics",
     "opencv-python-headless",
     "pillow>=11.3.0",
-    "flask>=3.1.1",
     "ncnn>=1.0.20250503",
+    "aiohttp-jinja2>=1.6",
 ]
 
 [project.scripts]
-doover-app-run = "cattle_cam:main"
-cattle-cam-stream = "cattle_cam.cattle_cam:main"
-export-config = "cattle_cam.app_config:export"
+doover-app-run = "camera_inference:main"
+export-config = "camera_inference.app_config:export"
 
 [build-system]
 requires = ["hatchling"]

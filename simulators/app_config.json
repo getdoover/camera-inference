@@ -1,6 +1,12 @@
 {
-    "simulator_app_key": "sim_app_key",
-    "digital_input_count": 1,
-    "digital_output_count": 2,
-    "a_funny_message": "yeeha"
+    "model": "yolo11n",
+    "viewer_port": 8083,
+    "rtsp_uri": "rtsp://admin:19HandleyDrive@192.168.0.78:554/live",
+    "object_whitelist": [
+        "tv",
+        "refrigerator",
+        "toothbrush",
+        "person"
+    ],
+    "confidence_threshold": 80
 }
