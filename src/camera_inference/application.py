@@ -39,8 +39,8 @@ class CameraInferenceApplication(Application):
             await web_server.start()
 
     async def main_loop(self):
-        # log.info(f"State is: {self.state.state}")
-        if self.get_tag("inference_enabled", default=False):
+        log.info(f"State is: {'on' if self.inference_enabled.is_set() else 'off'}")
+        if self.get_tag("inference_enabled", default=True):
             self.inference_enabled.set()
         else:
             self.inference_enabled.clear()
